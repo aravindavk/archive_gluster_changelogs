@@ -5,11 +5,9 @@ changelogs which are already consumed.
 
 ## NOTE:
 
-- Do not use this tool if `glusterfind` or any other tools are
-  used with Volume(Tools which consumes Changelogs other than
-  Geo-replication)
-- Use this tool only when all the Geo-rep sessions are in Changelog
-  mode(Geo-rep Status will show this information)
+- If Geo-replication is used, use this tool only when all the Geo-rep
+  sessions are in Changelog mode(Geo-rep Status will show this
+  information)
 
 ## Usage
 
@@ -30,5 +28,6 @@ Example:
 - List xattrs for given brick path
 - If xattr name ends with `.stime`, read the xattr value(Repeat this
   for all the stime xattrs)
+- Gets Timestamp from brick status files of Glusterfind
 - Archive all changelogs files if Changelog file Timestamp is less
-  than min of stime values collected in previous step.
+  than min of stime values collected in previous steps.
