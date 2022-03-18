@@ -7,12 +7,11 @@ import shutil
 import urllib.request, urllib.parse, urllib.error
 from pathlib import Path
 import configparser
+import tarfile
+import time
 
 GLUSTERFIND_DIR = "/var/lib/glusterd/glusterfind"
 config = configparser.ConfigParser()
-
-def move_changelog(to_dir, changelog_file):
-    shutil.move(changelog_file, to_dir)
 
 
 def get_glusterfind_time(brick_path):
@@ -39,9 +38,11 @@ def get_glusterfind_time(brick_path):
 
 def get_archive_stime(brick_path):
     """
+    Get all stime xattrs and find minimum stime
+    """
+    """
     When removing georep sessions dangling stimes will remain with a value of "0"
     We want to avoid them , so we check for the stime-xattr-prefix in each gsyncd.conf
-    Then we get the minimum stime
     """
     xattrs_list = []
     for path in Path('/var/lib/glusterd/geo-replication/').rglob('gsyncd.conf'):
@@ -65,14 +66,18 @@ def main(brick_path, archive_dir):
     glusterfind_time = get_glusterfind_time(brick_path)
     if glusterfind_time is not None:
         stime = min(stime, glusterfind_time)
+    # Define our tarfile and open it
+    tarfullpath = f"{archive_dir }/{ int(time.time()) }.tgz"
+    tar_archive = tarfile.open(tarfullpath, "w:gz")
 
     changelogs_dir = os.path.join(brick_path, ".glusterfs/changelogs")
     for cf in Path(changelogs_dir).rglob('CHANGELOG.*'):
             cf_ts = int(cf.name.split(".")[-1])
             if cf_ts < stime:
-                move_changelog(archive_dir, os.path.join(changelogs_dir, cf))
+                tar_archive.add(os.path.join(changelogs_dir, cf))
+                os.remove(os.path.join(changelogs_dir, cf))
                 print("Archived: {0}".format(cf))
+    tar_archive.close()
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
-
