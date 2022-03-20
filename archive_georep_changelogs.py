@@ -40,20 +40,13 @@ def get_archive_stime(brick_path):
     """
     Get all stime xattrs and find minimum stime
     """
-    """
-    When removing georep sessions dangling stimes will remain with a value of "0"
-    We want to avoid them , so we check for the stime-xattr-prefix in each gsyncd.conf
-    """
-    xattrs_list = []
-    for path in Path('/var/lib/glusterd/geo-replication/').rglob('gsyncd.conf'):
-        config.read(path)
-        #print(f"Reading stime prefix { config['vars']['stime-xattr-prefix'] } from file { path }")
-        xattrs_list.append(config['vars']['stime-xattr-prefix'] + '.stime')
-
     stime_xattr_values = []
+    xattrs_list = xattr.listxattr(brick_path)
     for x in xattrs_list:
-        stime = struct.unpack("!II", xattr.getxattr(brick_path, x))
-        stime_xattr_values.append(stime[0])
+        if x.endswith(".stime"):
+            stime = struct.unpack("!II", xattr.getxattr(brick_path, x))
+            if stime[0] > 0:
+                stime_xattr_values.append(stime[0])
 
     if stime_xattr_values:
         return min(stime_xattr_values)
@@ -81,3 +74,4 @@ def main(brick_path, archive_dir):
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
+
