@@ -11,17 +11,20 @@ changelogs which are already consumed.
 
 ## Usage
 
+    # When using python2
     mkdir <archive_dir>
-    python main.py <brick_path> <archive_dir>
+    python2 archive_georep_changelogs_p2.py <brick_path> <archive_dir>
     cd <archive_dir>
     tar cvzf <archive>.tar.gz <archive>/
+
+    # When using python3
+    mkdir <archive_dir>
+    python3 archive_georep_changelogs_p3.py <brick_path> <archive_dir>
 
 Example:
 
     mkdir /backups/changelogs_bricks_b1_20170119
-    python main.py /bricks/b1 /backups/changelogs_bricks_b1_20170119
-    cd /backups/
-    tar cvzf changelogs_bricks_b1_20170119.tar.gz changelogs_bricks_b1_20170119
+    python3 archive_georep_changelogs_p3.py /bricks/b1 /backups/changelogs_bricks_b1_20170119
 
 ## How it works?
 
@@ -31,3 +34,4 @@ Example:
 - Gets Timestamp from brick status files of Glusterfind
 - Archive all changelogs files if Changelog file Timestamp is less
   than min of stime values collected in previous steps.
+- The python3 version of the script creates a tgz archive and adds all changelog files to it.
