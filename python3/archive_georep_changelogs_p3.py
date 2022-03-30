@@ -13,7 +13,6 @@ from glustercli.cli import georep
 import socket
 
 GLUSTERFIND_DIR = "/var/lib/glusterd/glusterfind"
-config = configparser.ConfigParser()
 
 
 def get_glusterfind_time(brick_path):
@@ -64,12 +63,16 @@ def main(brick_path, archive_dir):
             crawl_status = params["crawl_status"]
             status = params["status"]
             master_node = params["master_node"] # source host for the session entry
+            master_brick = params["master_brick"]
+
             # We check for our host 
             # if the session is Active/Passive (we want to avoid Stopped/Paused)
             # and the crawl_mode is either changelog or N/A
-            if master_node in hostname and (( status == "Active" and crawl_status  == "Changelog Crawl") 
-                    or ( status == "Passive" and  crawl_status == "N/A")):
-                
+            if ( master_node in hostname and 
+                    master_brick == brick_path.rstrip("/") and 
+                    (( status == "Active" and crawl_status  == "Changelog Crawl") or 
+                        ( status == "Passive" and  crawl_status == "N/A")) ):
+
                 stime = get_archive_stime(brick_path)
                 glusterfind_time = get_glusterfind_time(brick_path)
                 if glusterfind_time is not None:
@@ -89,4 +92,3 @@ def main(brick_path, archive_dir):
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
-
