@@ -9,6 +9,9 @@ changelogs which are already consumed.
   sessions are in Changelog mode(Geo-rep Status will show this
   information)
 
+## REQUIREMENTS
+You need an up to date xattr python3 module, as in version 0.6.1 (EL7) xattr.listxattr() returns bytestrings.
+
 ## Usage
 
     # When using python2
