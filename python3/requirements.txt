@@ -1,0 +1,2 @@
+glustercli==0.8.2
+xattr==0.9.9

@@ -9,6 +9,8 @@ from pathlib import Path
 import configparser
 import tarfile
 import time
+from glustercli.cli import georep
+import socket
 
 GLUSTERFIND_DIR = "/var/lib/glusterd/glusterfind"
 config = configparser.ConfigParser()
@@ -55,22 +57,35 @@ def get_archive_stime(brick_path):
 
 
 def main(brick_path, archive_dir):
-    stime = get_archive_stime(brick_path)
-    glusterfind_time = get_glusterfind_time(brick_path)
-    if glusterfind_time is not None:
-        stime = min(stime, glusterfind_time)
-    # Define our tarfile and open it
-    tarfullpath = f"{archive_dir }/{ int(time.time()) }.tgz"
-    tar_archive = tarfile.open(tarfullpath, "w:gz")
-
-    changelogs_dir = os.path.join(brick_path, ".glusterfs/changelogs")
-    for cf in Path(changelogs_dir).rglob('CHANGELOG.*'):
-            cf_ts = int(cf.name.split(".")[-1])
-            if cf_ts < stime:
-                tar_archive.add(os.path.join(changelogs_dir, cf))
-                os.remove(os.path.join(changelogs_dir, cf))
-                print("Archived: {0}".format(cf))
-    tar_archive.close()
+    hostname = socket.gethostname()
+    georepstatus = georep.status()
+    for geosession in georepstatus:
+        for params in geosession:
+            crawl_status = params["crawl_status"]
+            status = params["status"]
+            master_node = params["master_node"] # source host for the session entry
+            # We check for our host 
+            # if the session is Active/Passive (we want to avoid Stopped/Paused)
+            # and the crawl_mode is either changelog or N/A
+            if master_node in hostname and (( status == "Active" and crawl_status  == "Changelog Crawl") 
+                    or ( status == "Passive" and  crawl_status == "N/A")):
+                
+                stime = get_archive_stime(brick_path)
+                glusterfind_time = get_glusterfind_time(brick_path)
+                if glusterfind_time is not None:
+                    stime = min(stime, glusterfind_time)
+                # Define our tarfile and open it
+                tarfullpath = f"{archive_dir }/{ int(time.time()) }.tgz"
+                tar_archive = tarfile.open(tarfullpath, "w:gz")
+            
+                changelogs_dir = os.path.join(brick_path, ".glusterfs/changelogs")
+                for cf in Path(changelogs_dir).rglob('CHANGELOG.*'):
+                        cf_ts = int(cf.name.split(".")[-1])
+                        if cf_ts < stime:
+                            tar_archive.add(os.path.join(changelogs_dir, cf))
+                            os.remove(os.path.join(changelogs_dir, cf))
+                            print("Archived: {0}".format(cf))
+                tar_archive.close()
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])

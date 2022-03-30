@@ -9,8 +9,14 @@ changelogs which are already consumed.
   sessions are in Changelog mode(Geo-rep Status will show this
   information)
 
+  Note: In archive_georep_changelogs_p3.py this check is in the script
+
 ## REQUIREMENTS
-You need an up to date xattr python3 module, as in version 0.6.1 (EL7) xattr.listxattr() returns bytestrings.
+- python2:
+  * xattr
+- python3:
+  * xattr
+  * glustercli
 
 ## Usage
 
