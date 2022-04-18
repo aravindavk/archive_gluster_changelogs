@@ -11,7 +11,6 @@ import tarfile
 import time
 
 GLUSTERFIND_DIR = "/var/lib/glusterd/glusterfind"
-config = configparser.ConfigParser()
 
 
 def get_glusterfind_time(brick_path):
