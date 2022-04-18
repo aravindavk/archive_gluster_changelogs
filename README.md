@@ -3,12 +3,6 @@ Changelogs are not required for Geo-replication once the Changelogs
 are consumed and synced to Slave. This tool helps to archive the
 changelogs which are already consumed.
 
-## NOTE:
-
-- If Geo-replication is used, use this tool only when all the Geo-rep
-  sessions are in Changelog mode(Geo-rep Status will show this
-  information)
-
 ## Usage
 
     # When using python2
